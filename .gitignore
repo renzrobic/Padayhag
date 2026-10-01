@@ -1,0 +1,13 @@
+# Operating System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs & Temporary Files
+*.log
+*.tmp
+scratch/
+.tempmediaStorage/
+
+# Node Modules (if applicable)
+node_modules/

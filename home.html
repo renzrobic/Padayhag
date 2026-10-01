@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPark - Parking Management System</title>
+
+    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- CDNs: QRCode.js, Html5-QRCode, Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Clean Light Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="behance-theme">
+    <!-- Top Web Application Header Bar -->
+    <header class="app-global-header">
+        <div class="header-left">
+            <div class="brand-badge-box" onclick="App.switchView('view-allocation')">
+                <span class="brand-letter">P</span>
+            </div>
+            <div class="brand-text-block" onclick="App.switchView('view-allocation')">
+                <span class="brand-name">SmartPark</span>
+                <span class="brand-badge-live">LIVE SYSTEM</span>
+            </div>
+
+            <!-- Location Selector Dropdown -->
+            <div class="header-location-pill" title="Switch Parking Location">
+                <span class="loc-pin">📍</span>
+                <div class="loc-text-col">
+                    <span class="loc-micro-label">Location</span>
+                    <span class="loc-current-title" id="topbar-loc-title">Sector 6, Vaishali</span>
+                </div>
+                <select id="facility-select-dropdown" class="header-facility-select" onchange="App.switchFacility(this.value)">
+                    <option value="timessquare">Times Square Parking, New York</option>
+                    <option value="pagadian">Robinsons Commercial, Pagadian City</option>
+                    <option value="manila">BGC Smart Complex, Manila</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="header-center">
+            <div class="header-search-bar">
+                <input type="text" class="header-search-input" placeholder="Search location or parking..." />
+                <button type="button" class="header-search-btn" aria-label="Search">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Audio, Simulation & Book Now CTA -->
+        <div class="header-right">
+            <button type="button" id="btn-sound-toggle-top" class="btn-sound-mini active" onclick="SoundFX.toggle()" title="Toggle Sound Feedback">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                </svg>
+            </button>
+
+            <div class="header-sim-group">
+                <button type="button" class="sim-pill-btn" onclick="IoTSimulator.triggerRandomArrival()" title="Simulate vehicle arrival">+ Arrival</button>
+                <button type="button" class="sim-pill-btn" onclick="IoTSimulator.triggerRandomDeparture()" title="Simulate vehicle departure">- Exit</button>
+            </div>
+
+            <!-- Golden Yellow CTA: Book Now -->
+            <button type="button" class="btn-header-cta-yellow" onclick="SoundFX.playSelect(); App.switchView('view-reserve')">
+                <span>Book Now</span>
+                <span class="cta-arrow">→</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="app-layout">
+        
+        <!-- Left Sidebar Navigation (Pure Light Theme) -->
+        <aside class="sidebar-light" id="app-sidebar">
+            <!-- Brand Header -->
+            <div class="brand-container" onclick="App.switchView('view-allocation')">
+                <div class="brand-title">
+                    <div class="brand-icon-box">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="4" />
+                            <path d="M9 17V7h4a3 3 0 0 1 0 6H9" />
+                        </svg>
+                    </div>
+                    <span>SmartPark</span>
+                </div>
+                <div class="brand-subtitle-wrap">
+                    <span class="brand-subtitle">Facility System</span>
+                    <span class="brand-live-pill">Online</span>
+                </div>
+            </div>
+
+            <!-- Quick Action Button -->
+            <button type="button" class="btn-sidebar-cta" onclick="SoundFX.playSelect(); App.switchView('view-reserve')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>New Reservation</span>
+            </button>
+
+            <!-- Categorized Navigation Menu -->
+            <nav class="sidebar-nav">
+                <div class="nav-category-header">Customer Portal</div>
+                
+                <button class="nav-link active" data-view="view-allocation">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" rx="1" />
+                        <rect x="14" y="3" width="7" height="7" rx="1" />
+                        <rect x="14" y="14" width="7" height="7" rx="1" />
+                        <rect x="3" y="14" width="7" height="7" rx="1" />
+                    </svg>
+                    <span>Live Parking Deck</span>
+                </button>
+
+                <button class="nav-link" data-view="view-reserve">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                        <line x1="1" y1="10" x2="23" y2="10" />
+                    </svg>
+                    <span>Reserve & Pay</span>
+                </button>
+
+                <button class="nav-link" data-view="view-exit">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                    <span>Exit & Barrier</span>
+                </button>
+
+                <button class="nav-link" data-view="view-my-bookings">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                    </svg>
+                    <span>My Passes</span>
+                    <span class="nav-badge" id="badge-my-bookings">1</span>
+                </button>
+
+                <div class="nav-category-header" style="margin-top: 10px;">Operations</div>
+
+                <button class="nav-link" data-view="view-attendant">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    <span>Gate Console</span>
+                </button>
+
+                <button class="nav-link" data-view="view-admin">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10" />
+                        <line x1="12" y1="20" x2="12" y2="4" />
+                        <line x1="6" y1="20" x2="6" y2="14" />
+                    </svg>
+                    <span>Admin & Analytics</span>
+                </button>
+            </nav>
+
+            <!-- Driver Profile & Active Booking Mini-Cards -->
+            <div class="sidebar-driver-card">
+                <div class="driver-avatar-circle">JP</div>
+                <div class="driver-info-wrap">
+                    <div class="driver-name-tag" id="sidebar-driver-name">Jap</div>
+                    <div class="driver-plate-tag" id="sidebar-driver-plate">JUN-321 • Sedan</div>
+                </div>
+                <div class="driver-status-badge" title="Driver Verified">
+                    <span class="status-pulse-dot"></span>
+                </div>
+            </div>
+
+            <div class="sidebar-pass-widget" onclick="App.switchView('view-my-bookings')">
+                <div class="pass-widget-header">
+                    <span class="pass-widget-title">Active Booking</span>
+                    <span class="pass-widget-pill">LIVE</span>
+                </div>
+                <div class="pass-widget-bay">Slot-02 (Floor 1)</div>
+                <div class="pass-widget-sub">OR-PH-649139 • Paid ₱70.00</div>
+            </div>
+
+            <!-- Sidebar Footer Controls (Clean & Discreet) -->
+            <div class="sidebar-footer">
+                <div class="sidebar-status-row">
+                    <div class="sidebar-live-tag">
+                        <span class="iot-indicator-dot"></span>
+                        <span>Online • Live</span>
+                    </div>
+                    <button type="button" id="btn-sound-toggle" class="btn-sound-mini active" onclick="SoundFX.toggle()" title="Toggle sound feedback">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="sidebar-sim-strip">
+                    <span class="sim-label">Simulate:</span>
+                    <button type="button" class="sim-pill-btn" onclick="IoTSimulator.triggerRandomArrival()" title="Simulate vehicle arrival">+ Arrival</button>
+                    <button type="button" class="sim-pill-btn" onclick="IoTSimulator.triggerRandomDeparture()" title="Simulate vehicle departure">- Exit</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="content-area">
+
+            <!-- =====================================================================
+                 VIEW 1: LIVE PARKING DECK & ALLOCATION
+                 ===================================================================== -->
+            <section id="view-allocation" class="view-section active">
+                <!-- Facility Header -->
+                <div class="facility-bar-card">
+                    <div class="facility-meta">
+                        <div class="city-badge" id="facility-city-name">Pagadian City</div>
+                        <h1 class="facility-title" id="facility-lot-name">Robinsons Pagadian Commercial Parking Lot</h1>
+                        <p class="facility-address">
+                            <span>Address:</span> F. Duterte St • Open 24/7 • Smart Barrier & EV
+                        </p>
+                    </div>
+
+                    <!-- Facility Selector Pills -->
+                    <div class="facility-chips-group">
+                        <span class="chips-label">Location:</span>
+                        <button type="button" class="facility-chip active" onclick="App.switchFacility('pagadian')">Pagadian</button>
+                        <button type="button" class="facility-chip" onclick="App.switchFacility('cebu')">Cebu IT Park</button>
+                        <button type="button" class="facility-chip" onclick="App.switchFacility('davao')">Davao Bay</button>
+                        <button type="button" class="facility-chip" onclick="App.switchFacility('manila')">Manila Center</button>
+                    </div>
+                </div>
+
+                <!-- 4 Metric Status Cards (Spans Full Page Width) -->
+                <div class="metrics-row">
+                    <div class="metric-card">
+                        <div class="metric-card-header">
+                            <span class="metric-label">Available Spaces</span>
+                            <div class="metric-icon-box green">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                    <rect x="3" y="3" width="18" height="18" rx="4"></rect>
+                                    <path d="M9 17V7h4a3 3 0 0 1 0 6H9"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="metric-value" id="stat-vacant-count">8 / 12 Vacant</div>
+                        <div class="metric-sub">
+                            <span class="pulse-beacon green"></span>
+                            <span>Real-time sensor sync</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-card-header">
+                            <span class="metric-label">Standard Rate</span>
+                            <div class="metric-icon-box blue">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="metric-value" id="stat-standard-rate">₱35.00 / hr</div>
+                        <div class="metric-sub">Base 2 hours included</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-card-header">
+                            <span class="metric-label">Distance Away</span>
+                            <div class="metric-icon-box purple">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="metric-value" id="stat-facility-distance">0.65 km</div>
+                        <div class="metric-sub">Estimated 2 mins drive</div>
+                    </div>
+
+                    <div class="metric-card metric-card-occ">
+                        <div class="metric-card-header">
+                            <span class="metric-label">Occupancy Rate</span>
+                            <div class="metric-icon-box amber">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="M12 6v6l4 2"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="metric-value" id="stat-occupancy-percent">33%</div>
+                        <div class="metric-progress-track">
+                            <div class="metric-progress-fill" id="stat-occupancy-bar" style="width: 33%;"></div>
+                        </div>
+                        <div class="metric-sub" id="stat-occupancy-sub">4 of 12 bays active</div>
+                    </div>
+                </div>
+
+                <!-- Wide-Screen Master-Detail Split Layout: Uses the Whole Page! -->
+                <div class="deck-view-split-layout">
+                    <!-- Left / Main Column: The Interactive Parking Deck -->
+                    <div class="deck-main-col">
+                        <!-- Unified Deck Controls & Toolbar -->
+                        <div class="deck-toolbar-card">
+                            <div class="deck-toolbar-left">
+                                <!-- Floor Deck Switcher -->
+                                <div class="deck-filter-buttons">
+                                    <button type="button" class="deck-btn active" data-floor="1" onclick="App.setFloorFilter('1')">Floor 1</button>
+                                    <button type="button" class="deck-btn" data-floor="2" onclick="App.setFloorFilter('2')">Floor 2</button>
+                                    <button type="button" class="deck-btn" data-floor="all" onclick="App.setFloorFilter('all')">All Floors</button>
+                                </div>
+
+                                <!-- Vehicle Category Filter -->
+                                <div class="type-filter-wrap">
+                                    <select id="map-type-filter" class="form-select-custom" style="padding: 5px 10px; font-size: 12px; width: auto;" onchange="App.handleTypeFilterChange(this.value)">
+                                        <option value="all">All Vehicle Categories</option>
+                                        <option value="standard">Standard Cars</option>
+                                        <option value="ev">EV Fast Charging ⚡</option>
+                                        <option value="motorcycle">Motorcycle 🏍️</option>
+                                        <option value="pwd">Accessible ♿</option>
+                                        <option value="vip">VIP Reserved ⭐</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="deck-toolbar-right">
+                                <!-- Legend -->
+                                <div class="legend-pills">
+                                    <span><span class="legend-dot green"></span> Vacant</span>
+                                    <span><span class="legend-dot red"></span> Occupied</span>
+                                    <span><span class="legend-dot amber"></span> Reserved</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Parking Slots Bays Container -->
+                        <div class="parking-bays-container" id="parking-lot-grid-container">
+                            <!-- Rendered by ParkingMap.renderMap() -->
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Quick Booking, Places Near You & Live GPS Satellite Route -->
+                    <aside class="deck-side-col">
+                        <!-- Quick Booking Card: Behance Selected Slot M12 & Golden Yellow CTA -->
+                        <div class="card-quick-booking">
+                            <div class="quick-booking-slot-banner">
+                                <span class="selected-slot-pill" id="quick-slot-pill">
+                                    <span>📍</span>
+                                    <span>Selected Bay: <strong id="quick-slot-code">M12</strong></span>
+                                </span>
+                                <span class="slot-zone-tag" id="quick-slot-zone">Floor 1 • Standard</span>
+                            </div>
+
+                            <div class="quick-booking-pricing">
+                                <span class="quick-price-lbl">Standard Rate (Base 2 hrs)</span>
+                                <span class="quick-price-val" id="quick-price-display">₱35.00 / hr</span>
+                            </div>
+
+                            <!-- Vehicle Shortcuts -->
+                            <div class="quick-vehicle-shortcuts">
+                                <div class="quick-vehicle-chip active" data-type="sedan" onclick="App.setTransportation('sedan')">🚗 Sedan</div>
+                                <div class="quick-vehicle-chip" data-type="suv" onclick="App.setTransportation('suv')">🚙 SUV</div>
+                                <div class="quick-vehicle-chip" data-type="ev" onclick="App.setTransportation('ev')">⚡ EV Fast</div>
+                                <div class="quick-vehicle-chip" data-type="motorcycle" onclick="App.setTransportation('motorcycle')">🏍️ Moto</div>
+                            </div>
+
+                            <!-- Signature Golden Yellow CTA Button -->
+                            <button type="button" class="btn-behance-yellow" onclick="App.confirmSlotAndCheckout()" id="btn-quick-deck-book">
+                                <span>Proceed to Book <strong id="quick-btn-slot-label">M12</strong></span>
+                                <span class="arrow">→</span>
+                            </button>
+                        </div>
+
+                        <!-- Places Near You / Nearby Facilities (Inspired by Behance Screen 1 & 3) -->
+                        <div class="card-nearby-facilities">
+                            <div class="side-card-header">
+                                <span class="side-card-title">Places Near You</span>
+                                <span class="badge badge-success">3 Online</span>
+                            </div>
+                            <div class="nearby-facilities-list">
+                                <div class="nearby-facility-item" onclick="App.switchFacility('timessquare')">
+                                    <img src="images/parking_thumb_1.jpg" alt="Times Square Parking" class="nearby-thumb-img" />
+                                    <div class="nearby-info">
+                                        <div class="nearby-name">Times Square Parking</div>
+                                        <div class="nearby-meta-row">
+                                            <span class="nearby-rating">★ 4.8</span>
+                                            <span>•</span>
+                                            <span>2.4 Km Away</span>
+                                        </div>
+                                        <div class="nearby-rate-val">$2.7 / Day</div>
+                                    </div>
+                                </div>
+                                <div class="nearby-facility-item" onclick="App.switchFacility('pagadian')">
+                                    <img src="images/parking_thumb_2.jpg" alt="Robinsons Pagadian" class="nearby-thumb-img" />
+                                    <div class="nearby-info">
+                                        <div class="nearby-name">Robinsons Commercial Lot</div>
+                                        <div class="nearby-meta-row">
+                                            <span class="nearby-rating">★ 4.9</span>
+                                            <span>•</span>
+                                            <span>0.65 km Away</span>
+                                        </div>
+                                        <div class="nearby-rate-val">₱35.00 / hr</div>
+                                    </div>
+                                </div>
+                                <div class="nearby-facility-item" onclick="App.switchFacility('manila')">
+                                    <img src="images/parking_thumb_1.jpg" alt="BGC Smart Complex" class="nearby-thumb-img" />
+                                    <div class="nearby-info">
+                                        <div class="nearby-name">BGC Smart Parking Complex</div>
+                                        <div class="nearby-meta-row">
+                                            <span class="nearby-rating">★ 4.7</span>
+                                            <span>•</span>
+                                            <span>2.10 km Away</span>
+                                        </div>
+                                        <div class="nearby-rate-val">$3.5 / Day</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Satellite Map Card -->
+                        <div class="card facility-side-map-card">
+                            <div class="side-card-header">
+                                <span class="side-card-title">GPS Satellite Route</span>
+                                <a href="https://www.google.com/maps/search/?api=1&query=Rotonda+Park+Pagadian+City" target="_blank" class="btn-open-maps" id="link-open-maps" rel="noopener noreferrer">
+                                    Google Maps ↗
+                                </a>
+                            </div>
+                            <div class="side-map-wrapper">
+                                <iframe 
+                                    id="google-maps-frame"
+                                    src="https://maps.google.com/maps?q=Rotonda%20Park%20Pagadian%20City&t=&z=16&ie=UTF8&iwloc=&output=embed" 
+                                    width="100%" 
+                                    height="160" 
+                                    style="border:0;" 
+                                    allowfullscreen="" 
+                                    loading="lazy">
+                                </iframe>
+                            </div>
+                            <div class="side-map-meta">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                                <span>F. Duterte St, Pagadian City</span>
+                            </div>
+                        </div>
+
+                        <!-- Live Sensor Activity Feed -->
+                        <div class="card facility-activity-card">
+                            <div class="side-card-header">
+                                <span class="side-card-title">Live Sensor Activity</span>
+                                <span class="pulse-beacon green"></span>
+                            </div>
+                            <div class="activity-mini-list" id="activity-mini-list">
+                                <div class="activity-mini-item">
+                                    <span class="act-dot green"></span>
+                                    <span class="act-text">Slot M12 selected by JUN-321</span>
+                                    <span class="act-time">Just now</span>
+                                </div>
+                                <div class="activity-mini-item">
+                                    <span class="act-dot blue"></span>
+                                    <span class="act-text">Slot M11 EV fast charging</span>
+                                    <span class="act-time">4m ago</span>
+                                </div>
+                                <div class="activity-mini-item">
+                                    <span class="act-dot slate"></span>
+                                    <span class="act-text">Slot L13 occupied by ABC-1234</span>
+                                    <span class="act-time">12m ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </section>
+
+            <!-- =====================================================================
+                 VIEW 2: SECURE CHECKOUT & RESERVATION
+                 ===================================================================== -->
+            <section id="view-reserve" class="view-section">
+                <h1 class="view-title">Secure Checkout & Reservation</h1>
+
+                <div class="reserve-grid-2col">
+                    <!-- Left: Driver & Booking Verification -->
+                    <div class="card booking-verification-card">
+                        <h2 class="card-section-title">1. Space & Vehicle Category</h2>
+
+                        <!-- Quick Vehicle Category Selector Cards with Clean SVGs -->
+                        <div class="vehicle-selector-grid">
+                            <div class="vehicle-cat-card active" data-vehicle-type="sedan" onclick="App.handleVehicleTypeChange('sedan')">
+                                <div class="vehicle-cat-icon">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <rect x="3" y="11" width="18" height="6" rx="2"></rect>
+                                        <path d="M5 11l2-5h10l2 5"></path>
+                                        <circle cx="7" cy="17" r="2"></circle>
+                                        <circle cx="17" cy="17" r="2"></circle>
+                                    </svg>
+                                </div>
+                                <div class="vehicle-cat-name">Sedan</div>
+                            </div>
+                            <div class="vehicle-cat-card" data-vehicle-type="suv" onclick="App.handleVehicleTypeChange('suv')">
+                                <div class="vehicle-cat-icon">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <rect x="2" y="10" width="20" height="7" rx="2"></rect>
+                                        <path d="M4 10l1.5-6h13l1.5 6"></path>
+                                        <circle cx="6.5" cy="17" r="2"></circle>
+                                        <circle cx="17.5" cy="17" r="2"></circle>
+                                    </svg>
+                                </div>
+                                <div class="vehicle-cat-name">SUV / Van</div>
+                            </div>
+                            <div class="vehicle-cat-card" data-vehicle-type="ev" onclick="App.handleVehicleTypeChange('ev')">
+                                <div class="vehicle-cat-icon">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+                                    </svg>
+                                </div>
+                                <div class="vehicle-cat-name">EV Fast</div>
+                            </div>
+                            <div class="vehicle-cat-card" data-vehicle-type="motorcycle" onclick="App.handleVehicleTypeChange('motorcycle')">
+                                <div class="vehicle-cat-icon">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <circle cx="5" cy="16" r="3"></circle>
+                                        <circle cx="19" cy="16" r="3"></circle>
+                                        <path d="M5 16l4-7h5l3 7M12 9l2 7M15 6h3"></path>
+                                    </svg>
+                                </div>
+                                <div class="vehicle-cat-name">Motorcycle</div>
+                            </div>
+                        </div>
+
+                        <div class="form-row-2col">
+                            <div class="form-group">
+                                <label class="form-label" for="book-slot-select">Assigned Space</label>
+                                <select id="book-slot-select" class="form-select-custom" onchange="App.handleSlotSelectChange(this.value)">
+                                    <!-- Populated dynamically -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="book-vehicle-type-select">Specification</label>
+                                <select id="book-vehicle-type-select" class="form-select-custom" onchange="App.handleVehicleTypeChange(this.value)">
+                                    <option value="sedan">Sedan / Hatchback</option>
+                                    <option value="suv">SUV / Van / Pickup</option>
+                                    <option value="motorcycle">Motorcycle (50% Off)</option>
+                                    <option value="ev">Electric Vehicle (EV Charging)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Integrated Driver Name & Vehicle Plate -->
+                        <h2 class="card-section-title" style="margin-top: 14px;">2. Driver Clearance</h2>
+                        <div class="form-row-2col">
+                            <div class="form-group">
+                                <label class="form-label" for="reserve-driver-name-input">Driver Name</label>
+                                <input type="text" id="reserve-driver-name-input" class="form-input" value="jap" placeholder="e.g. Juan Dela Cruz" oninput="App.currentUser.name = this.value; App.saveState();" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="reserve-plate-number-input">Plate Number</label>
+                                <input type="text" id="reserve-plate-number-input" class="form-input" value="JUN-321" placeholder="e.g. ABC-1234" style="text-transform: uppercase;" oninput="App.currentUser.plate = this.value.toUpperCase(); App.saveState();" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row-2col">
+                            <div class="form-group">
+                                <label class="form-label" for="reserve-duration-select">Duration</label>
+                                <select id="reserve-duration-select" class="form-select-custom" onchange="App.handleDurationChange()">
+                                    <option value="1">1 Hour</option>
+                                    <option value="2" selected>2 Hours</option>
+                                    <option value="3">3 Hours</option>
+                                    <option value="4">4 Hours</option>
+                                    <option value="5">5 Hours</option>
+                                    <option value="8">8 Hours Full Day</option>
+                                    <option value="12">12 Hours Extended</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="reserve-start-time-input">Scheduled Arrival</label>
+                                <input type="datetime-local" id="reserve-start-time-input" class="form-input">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">3. Payment Channel</label>
+                            <div class="payment-channels-pills">
+                                <label class="payment-pill active" id="pill-gcash">
+                                    <input type="radio" name="payment_channel" value="GCASH" checked onchange="App.handlePaymentChannelChange('GCASH')">
+                                    <span>GCash</span>
+                                </label>
+                                <label class="payment-pill" id="pill-maya">
+                                    <input type="radio" name="payment_channel" value="MAYA" onchange="App.handlePaymentChannelChange('MAYA')">
+                                    <span>Maya</span>
+                                </label>
+                                <label class="payment-pill" id="pill-cash">
+                                    <input type="radio" name="payment_channel" value="DESK CASH" onchange="App.handlePaymentChannelChange('DESK CASH')">
+                                    <span>Desk Cash</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Transaction Invoice -->
+                    <div class="card invoice-card">
+                        <h2 class="card-section-title">Invoice Summary</h2>
+
+                        <div class="invoice-row">
+                            <span class="invoice-label">Hourly Base Rate:</span>
+                            <span class="invoice-val" id="invoice-base-rate">₱35.00</span>
+                        </div>
+
+                        <div class="invoice-row">
+                            <span class="invoice-label">Duration:</span>
+                            <span class="invoice-val" id="invoice-multiplier">× 2 hrs</span>
+                        </div>
+
+                        <div class="invoice-row" id="invoice-ev-row" style="display: none;">
+                            <span class="invoice-label">⚡ EV Fast Charging:</span>
+                            <span class="invoice-val text-blue" id="invoice-ev-surcharge">+₱50.00</span>
+                        </div>
+
+                        <div class="invoice-row" id="invoice-mc-row" style="display: none;">
+                            <span class="invoice-label">🏍️ Motorcycle Discount:</span>
+                            <span class="invoice-val text-green">-50% Applied</span>
+                        </div>
+
+                        <div class="invoice-divider"></div>
+
+                        <div class="invoice-total-row">
+                            <span class="total-label">Total Due:</span>
+                            <span class="total-price" id="invoice-total-due">₱70.00</span>
+                        </div>
+
+                        <button type="button" class="btn-confirm-payment" onclick="App.authorizeAndConfirmPayment()">
+                            Confirm & Generate Pass
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- =====================================================================
+                 VIEW 3: EXIT SERVICE & HARDWARE BARRIER
+                 ===================================================================== -->
+            <section id="view-exit" class="view-section">
+                <h1 class="view-title">Exit & Vehicle Checkout</h1>
+
+                <div class="exit-grid-2col">
+                    <!-- Left: Active Session Clearance Pass -->
+                    <div class="card pass-card">
+                        <h2 class="card-section-title">Active Clearance Pass</h2>
+
+                        <div class="form-group">
+                            <label class="form-label">Vehicle Plate</label>
+                            <div class="readonly-badge-input" id="exit-display-plate">JUN-321</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Assigned Space</label>
+                            <div class="readonly-badge-input" id="exit-display-slot" style="color: var(--color-primary); background-color: var(--color-primary-50); border-color: var(--color-primary-100);">Slot-02</div>
+                        </div>
+
+                        <!-- Electronic Official Receipt (OR) -->
+                        <div class="electronic-receipt-box">
+                            <div class="receipt-header">
+                                <div class="receipt-verified-badge">✓ Payment Verified</div>
+                                <div class="receipt-company">SMARTPARK PHILIPPINES INC.</div>
+                            </div>
+
+                            <div class="receipt-details">
+                                <div class="receipt-line">
+                                    <span class="rc-label">OR Number:</span>
+                                    <span class="rc-value" id="receipt-or-number">OR-PH-649139</span>
+                                </div>
+                                <div class="receipt-line">
+                                    <span class="rc-label">Timestamp:</span>
+                                    <span class="rc-value" id="receipt-timestamp">7/16/2026 12:00 AM</span>
+                                </div>
+                                <div class="receipt-line">
+                                    <span class="rc-label">Payment Channel:</span>
+                                    <span class="rc-value" id="receipt-method">GCASH</span>
+                                </div>
+                            </div>
+
+                            <div class="receipt-divider"></div>
+
+                            <div class="receipt-total-row">
+                                <span class="rc-total-label">Total Amount Paid:</span>
+                                <span class="rc-total-amount" id="receipt-total-paid">₱70.00</span>
+                            </div>
+
+                            <div class="receipt-barcode-wrap">
+                                <svg class="barcode-svg" viewBox="0 0 200 35">
+                                    <rect x="10" y="5" width="4" height="25" fill="#344054"/>
+                                    <rect x="18" y="5" width="2" height="25" fill="#344054"/>
+                                    <rect x="24" y="5" width="6" height="25" fill="#344054"/>
+                                    <rect x="34" y="5" width="2" height="25" fill="#344054"/>
+                                    <rect x="40" y="5" width="8" height="25" fill="#344054"/>
+                                    <rect x="52" y="5" width="4" height="25" fill="#344054"/>
+                                    <rect x="60" y="5" width="2" height="25" fill="#344054"/>
+                                    <rect x="68" y="5" width="6" height="25" fill="#344054"/>
+                                    <rect x="78" y="5" width="4" height="25" fill="#344054"/>
+                                    <rect x="88" y="5" width="8" height="25" fill="#344054"/>
+                                    <rect x="100" y="5" width="2" height="25" fill="#344054"/>
+                                    <rect x="106" y="5" width="6" height="25" fill="#344054"/>
+                                    <rect x="116" y="5" width="4" height="25" fill="#344054"/>
+                                    <rect x="124" y="5" width="2" height="25" fill="#344054"/>
+                                    <rect x="130" y="5" width="6" height="25" fill="#344054"/>
+                                    <rect x="140" y="5" width="8" height="25" fill="#344054"/>
+                                    <rect x="152" y="5" width="2" height="25" fill="#344054"/>
+                                    <rect x="160" y="5" width="6" height="25" fill="#344054"/>
+                                    <rect x="170" y="5" width="4" height="25" fill="#344054"/>
+                                    <rect x="180" y="5" width="6" height="25" fill="#344054"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="receipt-actions-row">
+                            <button type="button" class="btn-secondary" onclick="App.printActiveReceipt()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;">
+                                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                                    <rect x="6" y="14" width="12" height="8"></rect>
+                                </svg>
+                                Print Receipt
+                            </button>
+                            <button type="button" class="btn-secondary" onclick="App.openPassQRModal()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;">
+                                    <rect x="3" y="3" width="7" height="7"></rect>
+                                    <rect x="14" y="3" width="7" height="7"></rect>
+                                    <rect x="14" y="14" width="7" height="7"></rect>
+                                    <rect x="3" y="14" width="7" height="7"></rect>
+                                </svg>
+                                Show QR Pass
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Hardware Barrier Control -->
+                    <div class="card barrier-card">
+                        <!-- LED Gate Indicator -->
+                        <div class="barrier-indicator-row">
+                            <div class="gate-status-tag" id="gate-status-badge">
+                                <span class="gate-led red" id="gate-led-light"></span>
+                                <span id="gate-status-text">Barrier Locked</span>
+                            </div>
+                        </div>
+
+                        <!-- Boom Barrier Graphic -->
+                        <div class="barrier-graphic-wrap">
+                            <svg class="barrier-svg" viewBox="0 0 160 110" width="150" height="100">
+                                <rect x="20" y="45" width="24" height="55" fill="#344054" rx="4" />
+                                <rect x="23" y="50" width="18" height="8" rx="2" fill="#1d2939" />
+                                <circle cx="28" cy="54" r="2" fill="#f04438" />
+                                <circle cx="36" cy="54" r="2" fill="#12b76a" />
+                                <path d="M14 100 L50 100 L44 95 L20 95 Z" fill="#1d2939" />
+                                
+                                <rect x="126" y="55" width="12" height="45" fill="#475467" rx="2" />
+                                <path d="M120 100 L144 100 L140 95 L124 95 Z" fill="#344054" />
+                                
+                                <g id="barrier-arm-group" style="transform-origin: 32px 55px; transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                                    <circle cx="32" cy="55" r="8" fill="#667085" stroke="#344054" stroke-width="2"/>
+                                    <rect x="32" y="49" width="104" height="12" fill="#f79009" stroke="#d97706" stroke-width="1" rx="2" />
+                                    <polygon points="42,49 50,49 40,61 32,61" fill="#1d2939" />
+                                    <polygon points="62,49 70,49 60,61 52,61" fill="#1d2939" />
+                                    <polygon points="82,49 90,49 80,61 72,61" fill="#1d2939" />
+                                    <polygon points="102,49 110,49 100,61 92,61" fill="#1d2939" />
+                                    <polygon points="122,49 130,49 120,61 112,61" fill="#1d2939" />
+                                    <circle cx="132" cy="55" r="3" fill="#f04438" id="arm-tip-led"/>
+                                </g>
+                            </svg>
+                        </div>
+
+                        <h2 class="barrier-title">Hardware Barrier Control</h2>
+                        <p class="barrier-description">
+                            Releases magnetic gate lock, marks bay as vacant in directory, and opens the exit barrier.
+                        </p>
+
+                        <button type="button" class="btn-release-gate" id="btn-release-gate" onclick="App.releaseSlotAndOpenGate()">
+                            Release Slot & Open Gate
+                        </button>
+                        <div id="gate-auto-close-countdown" class="gate-countdown-bar"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- =====================================================================
+                 VIEW 4: MY DIGITAL PASSES
+                 ===================================================================== -->
+            <section id="view-my-bookings" class="view-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h1 class="view-title" style="margin-bottom: 0;">My Parking Passes</h1>
+                    <button type="button" class="btn-primary-blue" style="width: auto; padding: 8px 16px;" onclick="App.switchView('view-reserve')">
+                        + New Reservation
+                    </button>
+                </div>
+
+                <div class="card" style="padding: 18px;">
+                    <div id="user-bookings-container">
+                        <!-- Rendered by BookingModule.renderUserBookings() -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- =====================================================================
+                 VIEW 5: GATE OPERATOR CONSOLE
+                 ===================================================================== -->
+            <section id="view-attendant" class="view-section">
+                <h1 class="view-title">Gate Operator Console</h1>
+
+                <div class="card" style="margin-bottom: 18px;">
+                    <div class="card-section-title">Vehicle Check-In</div>
+                    
+                    <div class="reserve-grid-2col">
+                        <!-- Code / Plate Check-in -->
+                        <div>
+                            <form id="gate-checkin-form" onsubmit="AttendantModule.handleCheckInSubmit(event)">
+                                <div class="form-group">
+                                    <label class="form-label" for="gate-ticket-input">Ticket / Reservation Code or Plate</label>
+                                    <input type="text" id="gate-ticket-input" class="form-input" placeholder="e.g. RES-649139 or JUN-321" style="text-transform: uppercase;">
+                                </div>
+                                <div style="display: flex; gap: 8px;">
+                                    <button type="submit" class="btn-primary-blue" style="flex: 1;">Check In</button>
+                                    <button type="button" class="btn-secondary" id="btn-toggle-camera-scan" onclick="AttendantModule.toggleCameraScanner()" style="display: flex; align-items: center; gap: 5px;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                                            <circle cx="12" cy="13" r="4"></circle>
+                                        </svg>
+                                        <span>Scan QR</span>
+                                    </button>
+                                </div>
+                            </form>
+                            <div id="qr-reader-container" style="margin-top: 10px;"></div>
+                        </div>
+
+                        <!-- Walk-in Entry -->
+                        <div style="border-left: 1px solid var(--color-border); padding-left: 18px;">
+                            <label class="form-label">Walk-In Entry (No Prior Booking)</label>
+                            <p style="color: var(--color-text-muted); font-size: 12.5px; margin-bottom: 10px;">
+                                Automatically allocates the next vacant bay and opens entrance barrier.
+                            </p>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="gate-walkin-plate-input" class="form-input" placeholder="Plate Number (e.g. ABC 1234)" style="text-transform: uppercase;">
+                                <button type="button" class="btn-primary-blue" style="width: auto; white-space: nowrap;" onclick="AttendantModule.handleWalkInEntry()">
+                                    Assign & Enter
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Parked Vehicles Table -->
+                <div class="card">
+                    <div class="card-section-title" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>Currently Parked Vehicles</span>
+                        <span style="font-size: 12.5px; color: var(--color-text-muted);" id="active-vehicles-count">0 Active</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Slot</th>
+                                    <th>Plate Number</th>
+                                    <th>Driver</th>
+                                    <th>Check-In Time</th>
+                                    <th>Duration</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="active-sessions-table-body">
+                                <!-- Rendered dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- =====================================================================
+                 VIEW 6: ADMIN DASHBOARD & ANALYTICS
+                 ===================================================================== -->
+            <section id="view-admin" class="view-section">
+                <h1 class="view-title">Facility Administration</h1>
+
+                <!-- 4 KPI Metrics -->
+                <div class="metrics-row" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 18px;">
+                    <div class="metric-card">
+                        <div class="metric-card-header">
+                            <span class="metric-label">Total Revenue</span>
+                            <div class="metric-icon-box blue">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="metric-value" id="admin-stat-total-revenue">₱0.00</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-header">
+                            <span class="metric-label">Today's Revenue</span>
+                            <div class="metric-icon-box green">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                    <polyline points="17 6 23 6 23 12"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="metric-value" id="admin-stat-today-revenue" style="color: var(--color-success-text);">₱0.00</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-header">
+                            <span class="metric-label">Occupancy Rate</span>
+                            <div class="metric-icon-box purple">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                    <path d="M18 20V10M12 20V4M6 20v-6"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="metric-value" id="admin-stat-occupancy-rate">0%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-header">
+                            <span class="metric-label">Total Sessions</span>
+                            <div class="metric-icon-box blue">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="metric-value" id="admin-stat-total-bookings">0</div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; margin-bottom: 18px;">
+                    <div class="card">
+                        <div class="card-section-title">Hourly Occupancy Trend</div>
+                        <div style="height: 200px; position: relative;">
+                            <canvas id="admin-occupancy-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-section-title">Vehicle Breakdown</div>
+                        <div style="height: 200px; position: relative;">
+                            <canvas id="admin-vehicle-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slot Inventory & Pricing Policy -->
+                <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; margin-bottom: 18px;">
+                    <!-- Slot Inventory -->
+                    <div class="card">
+                        <div class="card-section-title" style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Slot Inventory</span>
+                            <button type="button" class="btn-primary-blue" style="width: auto; padding: 5px 12px; font-size: 12px;" onclick="AdminModule.openAddSlotModal()">
+                                + Add Slot
+                            </button>
+                        </div>
+                        <div class="table-responsive" style="max-height: 240px;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Floor</th>
+                                        <th>Type</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-slots-table-body">
+                                    <!-- Rendered dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Pricing Settings -->
+                    <div class="card">
+                        <div class="card-section-title">Pricing Settings</div>
+                        <form id="admin-pricing-form" onsubmit="AdminModule.handleSettingsSubmit(event)">
+                            <div class="form-group">
+                                <label class="form-label">Facility Name</label>
+                                <input type="text" id="cfg-facility-name" class="form-input" required>
+                            </div>
+                            <div class="form-row-2col">
+                                <div class="form-group">
+                                    <label class="form-label">Base Rate (₱)</label>
+                                    <input type="number" id="cfg-base-rate" class="form-input" step="0.5" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">EV Surcharge (₱)</label>
+                                    <input type="number" id="cfg-ev-surcharge" class="form-input" step="0.5" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-primary-blue" style="margin-top: 6px;">Save Pricing</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Audit Logs & Backups -->
+                <div class="card">
+                    <div class="card-section-title" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>System Audit Logs</span>
+                        <div style="display: flex; gap: 8px;">
+                            <button type="button" class="btn-secondary" style="padding: 5px 10px; font-size: 12px;" onclick="AdminModule.exportDatabaseFile()">Export JSON</button>
+                            <button type="button" class="btn-secondary" style="padding: 5px 10px; font-size: 12px; color: var(--color-danger-text);" onclick="AdminModule.resetDatabasePrompt()">Reset DB</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive" style="max-height: 180px;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Event</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-logs-table-body">
+                                <!-- Rendered dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Modal 1: Digital QR Pass Modal -->
+    <div id="qr-pass-modal" class="modal-overlay">
+        <div class="modal-card" style="text-align: center;">
+            <div class="modal-header">
+                <h3>Digital Clearance Pass</h3>
+                <button type="button" class="modal-close" onclick="App.closePassQRModal()">&times;</button>
+            </div>
+            <div id="modal-qr-container" style="display: flex; justify-content: center; margin: 16px 0;"></div>
+            <div style="font-size: 15px; font-weight: 700; color: var(--color-text-main); margin-bottom: 2px;" id="qr-modal-plate">Plate: JUN-321</div>
+            <div style="font-size: 13.5px; color: var(--color-primary); font-weight: 600;" id="qr-modal-slot">Assigned: Slot-02</div>
+            <div style="font-size: 12px; color: var(--color-text-muted); font-family: var(--font-mono); margin-top: 4px;" id="qr-modal-code">Pass ID: RES-649139</div>
+            <p style="color: var(--color-text-muted); font-size: 12px; margin-top: 12px;">
+                Scan this QR code at camera terminal to trigger barrier arm.
+            </p>
+            <button type="button" class="btn-primary-blue" style="margin-top: 16px;" onclick="App.closePassQRModal()">Close Pass</button>
+        </div>
+    </div>
+
+    <!-- Modal 2: Add Slot Modal -->
+    <div id="admin-add-slot-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Add New Parking Slot</h3>
+                <button type="button" class="modal-close" onclick="App.closeModal('admin-add-slot-modal')">&times;</button>
+            </div>
+            <form id="admin-add-slot-form" onsubmit="AdminModule.handleAddSlotSubmit(event)">
+                <div class="form-group">
+                    <label class="form-label" for="add-slot-code">Slot Code</label>
+                    <input type="text" id="add-slot-code" class="form-input" placeholder="e.g. Slot-13" required>
+                </div>
+                <div class="form-row-2col">
+                    <div class="form-group">
+                        <label class="form-label" for="add-slot-floor">Floor</label>
+                        <select id="add-slot-floor" class="form-select-custom">
+                            <option value="1">Floor 1</option>
+                            <option value="2">Floor 2</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="add-slot-type">Category</label>
+                        <select id="add-slot-type" class="form-select-custom">
+                            <option value="standard">Standard</option>
+                            <option value="ev">EV Charging ⚡</option>
+                            <option value="motorcycle">Motorcycle 🏍️</option>
+                            <option value="pwd">Accessible ♿</option>
+                            <option value="vip">VIP ⭐</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary-blue" style="margin-top: 14px;">Create Slot</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 3: Gate Attendant Checkout Modal -->
+    <div id="gate-checkout-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Vehicle Exit & Clearance</h3>
+                <button type="button" class="modal-close" onclick="App.closeModal('gate-checkout-modal')">&times;</button>
+            </div>
+            <div id="checkout-modal-body">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modern Mobile Bottom Navigation Bar (Handhelds < 768px) -->
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Mobile Navigation">
+        <button type="button" class="bottom-nav-item active" data-view="view-allocation" onclick="App.switchView('view-allocation')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+                <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+                <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+            </svg>
+            <span>Deck</span>
+        </button>
+        <button type="button" class="bottom-nav-item" data-view="view-reserve" onclick="App.switchView('view-reserve')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                <line x1="1" y1="10" x2="23" y2="10"></line>
+            </svg>
+            <span>Reserve</span>
+        </button>
+        <button type="button" class="bottom-nav-item" data-view="view-exit" onclick="App.switchView('view-exit')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span>Exit</span>
+        </button>
+        <button type="button" class="bottom-nav-item" data-view="view-my-bookings" onclick="App.switchView('view-my-bookings')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span>Passes</span>
+            <span class="bottom-nav-badge" id="bottom-badge-passes">1</span>
+        </button>
+        <button type="button" class="bottom-nav-item" data-view="view-admin" onclick="App.switchView('view-admin')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+            <span>Admin</span>
+        </button>
+    </nav>
+
+    <!-- JS Scripts -->
+    <script src="js/sound.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/booking.js"></script>
+    <script src="js/attendant.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/simulator.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
